@@ -34,20 +34,29 @@ def evaluar_compatibilidad(perfil, oferta): #Función para asignar un perfil y o
 st.sidebar.title("🧑‍💼 Tu Perfil Profesional")
 
 with st.sidebar.form("perfil_formulario"):
-    nombre = st.text_input("Nombre", value="")
-    experiencia = st.slider("Años de experiencia", 0, 30, 5)
-    habilidades = st.text_area("Habilidades (Python, Django, SQL, etc.)", value="")
-    preferencias = st.text_input("Preferencias (ej. remoto, híbrido, etc.)", value="")
+    nombre = st.text_input("Nombre", placeholder="Ingresa tu nombre")
+    experiencia = st.slider("Años de experiencia", 0, 30)
+    habilidades = st.text_area("Habilidades (Python, Django, SQL, etc.)", placeholder="Ingresa tus habilidades separadas por coma")
+    preferencias = st.selectbox("Modalidad preferida", ["Remoto", "Híbrido", "Presencial"])
     submit = st.form_submit_button("Guardar perfil")
 
-if submit or "perfil_resumen" not in st.session_state:
+perfil_completo = (
+    nombre.strip() != "" and
+    habilidades.strip() != "" and
+    experiencia > 0
+)
+
+if submit and perfil_completo:
     st.session_state.perfil_resumen = (
         f"{nombre}, profesional con {experiencia} años de experiencia en {habilidades}. "
         f"Busca oportunidades laborales con preferencia por modalidad {preferencias.lower()}."
     )
     st.session_state.index = 0
     st.session_state.historial = []
-
+    st.session_state.perfil_valido = True
+elif submit:
+    st.warning("Por favor completa todos los campos del perfil antes de continuar.")
+    st.session_state.perfil_valido = False
 #Simulación de ofertas laborales
 ofertas = [
     "Empresa de tecnología busca desarrollador backend con experiencia en Django y PostgreSQL. Trabajo remoto.",
@@ -67,28 +76,31 @@ ofertas = [
     "Empresa de logística contrata ingeniero en sistemas con experiencia en integración de APIs REST."
 ]
 
-st.title("💼 Swipe laboral con IA")
 
-if st.session_state.index < len(ofertas):
-    oferta_actual = ofertas[st.session_state.index]
-    
-    st.subheader("📄 Oferta laboral")
-    st.write(oferta_actual)
+st.title("💼 Jobder: Encuentra tu trabajo ideal")
 
-    if st.button("✅ Me interesa"):
-        st.session_state.historial.append((oferta_actual, "interesado"))
-        st.session_state.index += 1
+if st.session_state.get("perfil_valido"):
+    if st.session_state.index < len(ofertas):
+        oferta_actual = ofertas[st.session_state.index]
+        
+        st.subheader("📄 Oferta laboral")
+        st.write(oferta_actual)
 
-    if st.button("❌ No me interesa"):
-        st.session_state.historial.append((oferta_actual, "no interesado"))
-        st.session_state.index += 1
+        if st.button("✅ Me interesa"):
+            st.session_state.historial.append((oferta_actual, "interesado"))
+            st.session_state.index += 1
 
-    with st.expander("🤖 Evaluación de compatibilidad de la IA"):
-        recomendacion = evaluar_compatibilidad(st.session_state.perfil_resumen, oferta_actual)
-        st.write(recomendacion)
+        if st.button("❌ No me interesa"):
+            st.session_state.historial.append((oferta_actual, "no interesado"))
+            st.session_state.index += 1
 
+        with st.expander("🤖 Evaluación de compatibilidad de la IA"):
+            recomendacion = evaluar_compatibilidad(st.session_state.perfil_resumen, oferta_actual)
+            st.write(recomendacion)
+    else:
+        st.success("¡Has revisado todas las ofertas!")
+        st.subheader("📋 Historial de tus elecciones:")
+        for oferta, decision in st.session_state.historial:
+            st.markdown(f"- **{decision.upper()}**: {oferta}")
 else:
-    st.success("¡Has revisado todas las ofertas!")
-    st.subheader("📋 Historial de tus elecciones:")
-    for oferta, decision in st.session_state.historial:
-        st.markdown(f"- **{decision.upper()}**: {oferta}")
+    st.info("📝 Por favor completa el formulario en la barra lateral para comenzar.")
