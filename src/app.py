@@ -1,5 +1,6 @@
 #Se debe ejecutar en un entorno virtual con las dependencias:
 #openai, streamlit y python-dotenv.
+#Se debe crear un archivo .env en la carpeta src donde estará una variable "apiKey= su api key de openai".
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
