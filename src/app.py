@@ -47,6 +47,7 @@ perfil_completo = (
     experiencia > 0
 )
 
+#Valida si el formulario del perfil laboral se ha digitado y guardado.
 if submit and perfil_completo:
     st.session_state.perfil_resumen = (
         f"{nombre}, profesional con {experiencia} años de experiencia en {habilidades}. "
